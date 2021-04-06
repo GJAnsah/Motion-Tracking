@@ -4,11 +4,12 @@ videoSource = VideoReader(''); %insert videofile name here with file extension. 
 videoSource.CurrentTime= ;  %video time (seconds) to start tracking from.
 videoPlayer = vision.VideoPlayer();
 
-T=[];
-C1=[];
-C2=[];
-CC=[];
+T=[]; %stores horizontal displacement using bounding box
+W=[]; %stores vertical displacement using bounding box
+C1=[]; %stores horizontal displacement using centroid
+C2=[]; %stores vertical displacement using centroid
 
+CC=[];
 while hasFrame(videoSource)
     x  = readFrame(videoSource);
     frame=x;
@@ -27,16 +28,18 @@ while hasFrame(videoSource)
             end
         end
     end
-    %subtracting the grayscale image from the red channel
+    %subtracting the grayscale image from the channel 2 (green). use 1 for red and 3 for blue. 
     x2 = imsubtract(x(:,:,2), rgb2gray(x));
     %Use a median filter to filter out noise
     x2 = medfilt2(x2, [3 3]);
     
-    %removing objects with few pixels
+    %removing objects with less than 20 pixels. 
     x2 = bwareaopen(x2,20);
     
     %converting image to black and white
     %      x2 = im2bw(x2,0.18);
+    
+    %label object
     bw = bwlabel(x2);
     
     %finding the boundaries of objects
@@ -56,17 +59,22 @@ while hasFrame(videoSource)
             disp('next bb')
             disp(bb);
             break
-        end 
+        end
     end
+    %updating displacement arrays
     T=[T,bb(1)];
+    W=[W,bb(2)];
     CC=[CC,cc];
     C1=[C1,cc(1)];
-    C2=[C1,cc(2)];
+    C2=[C2,cc(2)];
     disp(length(T));
     %      videoPlayer(out);
     pause(0.1);
 end
 release(videoPlayer);
-%save('VidAcc_variables')
+
+save('VidAcc_variables') %saving variables. 
+
+% calculating velocity and acceleration plots. 
 Vt=diff(T)*30;
 At=diff(Vt)*30;
