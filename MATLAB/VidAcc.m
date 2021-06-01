@@ -9,13 +9,23 @@ W=[]; %stores vertical displacement using bounding box
 C1=[]; %stores horizontal displacement using centroid
 C2=[]; %stores vertical displacement using centroid
 
+%maximum and min values of color components in pixels
+%in the below example desired pixel elements should have blue and red colors not more than 60 and 100 respectively
+%and green colors not less than 80
+Gmax = 0;
+Bmax = 60;
+Rmax = 100;
+Gmin = 80;
+Bmin = 0;
+Rmin = 0;
+
 CC=[];
 while hasFrame(videoSource)
     x  = readFrame(videoSource);
     frame=x;
     % Taking each picture element in the matrix across each row, we determine
-    % if it has rbg value with red value less than Rmin or green value more than
-    %  Gmax or blue value more than Bmax and make it white if its true
+    % if it has rbg value with red value greater than Rmax or green value less than
+    %  Gmin or blue value more than Bmax and make it white if its true
     if size(x,3)<3
         for e=size(x)+1:3
             x(:,:,e)=zeros(size(x,1),size(x,2));
@@ -23,7 +33,7 @@ while hasFrame(videoSource)
     end
     for i=1:size(x,1)
         for j=1:size(x,2)
-            if x(i,j,1)>100|| x(i,j,2)<80 || x(i,j,3)>60
+            if x(i,j,1)>Rmax|| x(i,j,2)<Gmin || x(i,j,3)>Bmax
                 x(i,j,:)=[255 255 255];
             end
         end
@@ -46,6 +56,7 @@ while hasFrame(videoSource)
     stats = regionprops(bw, 'BoundingBox','Centroid');
     
     imshow(frame);
+    %selecting bounding box with the largest width
     widths=[];
     for object = 1:length(stats)
         bb = stats(object).BoundingBox;
