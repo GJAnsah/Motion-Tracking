@@ -51,7 +51,3 @@ Variables saved to `VidAcc_variables.mat`
 
 ## 📦 Requirements
 - MATLAB Image Processing Toolbox
-
-## 📄 License
-
-MIT
